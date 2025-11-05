@@ -8,6 +8,7 @@ import { ArrowLeft, Star, Trophy } from 'lucide-react';
 import Mascot from '@/components/Mascot';
 import Confetti from '@/components/Confetti';
 import BadgeDetailModal from '@/components/BadgeDetailModal';
+import Navbar from '@/components/Navbar';
 import { useCountUp } from '@/hooks/useCountUp';
 import { useState, useEffect } from 'react';
 
@@ -55,9 +56,11 @@ const Rewards = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 md:p-12 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
+    <div className="min-h-screen relative">
+      <Navbar />
       <Confetti trigger={showConfetti} />
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="pt-20 sm:pt-24 pb-20 md:pb-6 px-4 sm:px-6 md:px-12 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10">
+        <div className="max-w-6xl mx-auto space-y-8">
         {/* Hero Section */}
         <div className="text-center space-y-4 animate-fade-in">
           <h1 className="text-5xl md:text-6xl font-bold text-foreground">
@@ -224,6 +227,7 @@ const Rewards = () => {
         </div>
 
         <Mascot mood="celebrating" />
+        </div>
       </div>
     </div>
   );

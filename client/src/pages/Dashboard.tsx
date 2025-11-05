@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useStudent } from '@/contexts/StudentContext';
 import { subjects } from '@/data/mockData';
-import { Trophy, Star, Flame, Settings } from 'lucide-react';
+import { Trophy, Star, Flame, User } from 'lucide-react';
 import Mascot from '@/components/Mascot';
 import FloatingShapes from '@/components/FloatingShapes';
-import ThemeToggle from '@/components/ThemeToggle';
+import Navbar from '@/components/Navbar';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -16,55 +16,44 @@ const Dashboard = () => {
   const progressPercentage = Math.min((student.completedTopics.length / 8) * 100, 100);
 
   return (
-    <div className="min-h-screen p-6 md:p-12 relative">
-      <ThemeToggle />
+    <div className="min-h-screen relative">
+      <Navbar />
       <FloatingShapes />
-      <div className="max-w-6xl mx-auto space-y-8 relative z-10">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between bg-card/80 backdrop-blur-sm p-6 rounded-3xl shadow-lg">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-3xl shadow-lg">
-              👦
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">Hello, {student.name}! 👋</h2>
-              <p className="text-foreground/70">Class {student.class}</p>
-            </div>
+      <div className="pt-20 sm:pt-24 pb-20 md:pb-6 px-4 sm:px-6 md:px-12">
+        <div className="max-w-6xl mx-auto space-y-8 relative z-10">
+          {/* Welcome Banner */}
+          <div className="bg-gradient-to-r from-primary/20 via-accent/20 to-secondary/20 backdrop-blur-sm p-6 sm:p-8 rounded-3xl shadow-lg border-2 border-primary/20">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">Hello, {student.name}! 👋</h2>
+            <p className="text-lg text-foreground/70">Ready to continue your learning adventure?</p>
           </div>
-           {/* Quick Stats */}
-        <div className="flex flex-wrap gap-4">
-          <Card className="px-6 py-3 bg-gradient-to-r from-destructive/20 to-destructive/10 border-destructive/30 hover:scale-105 transition-transform">
-            <div className="flex items-center gap-2">
-             
-              <span className="font-bold text-foreground">🔥 3 days streak!</span>
-            </div>
-          </Card>
-          <Card className="px-6 py-3 bg-gradient-to-r from-accent/20 to-accent/10 border-accent/30 hover:scale-105 transition-transform">
-            <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-accent" />
-              <span className="font-bold text-foreground">{student.completedTopics.length} topics completed</span>
-            </div>
-          </Card>
-        </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Star className="w-6 h-6 text-secondary fill-secondary" />
-              <span className="text-2xl font-bold text-foreground">{student.stars}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Trophy className="w-6 h-6 text-supporting-orange" />
-              <span className="text-2xl font-bold text-foreground">{student.badges.length}</span>
-            </div>
-            <Button
-              onClick={() => navigate('/settings')}
-              variant="outline"
-              size="icon"
-              className="rounded-full w-12 h-12 hover:bg-primary/10 hover:scale-110 transition-all"
-            >
-              <Settings className="w-5 h-5" />
-            </Button>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="p-4 bg-gradient-to-r from-destructive/20 to-destructive/10 border-destructive/30 hover:scale-105 transition-transform">
+              <div className="text-center">
+                <div className="text-3xl mb-2">🔥</div>
+                <div className="font-bold text-foreground">3 Day Streak!</div>
+              </div>
+            </Card>
+            <Card className="p-4 bg-gradient-to-r from-accent/20 to-accent/10 border-accent/30 hover:scale-105 transition-transform">
+              <div className="text-center">
+                <div className="text-3xl mb-2">📚</div>
+                <div className="font-bold text-foreground">{student.completedTopics.length} Topics</div>
+              </div>
+            </Card>
+            <Card className="p-4 bg-gradient-to-r from-yellow-500/20 to-yellow-600/10 border-yellow-500/30 hover:scale-105 transition-transform">
+              <div className="text-center">
+                <div className="text-3xl mb-2">⭐</div>
+                <div className="font-bold text-foreground">{student.stars} Stars</div>
+              </div>
+            </Card>
+            <Card className="p-4 bg-gradient-to-r from-orange-500/20 to-orange-600/10 border-orange-500/30 hover:scale-105 transition-transform">
+              <div className="text-center">
+                <div className="text-3xl mb-2">🏆</div>
+                <div className="font-bold text-foreground">{student.badges.length} Badges</div>
+              </div>
+            </Card>
           </div>
-        </div>
 
         {/* Progress Section */}
         <Card className="p-8 bg-white/80 backdrop-blur-sm shadow-2xl border-2 border-primary/20">
@@ -158,6 +147,7 @@ const Dashboard = () => {
         )}
 
         <Mascot mood="idle" />
+        </div>
       </div>
     </div>
   );

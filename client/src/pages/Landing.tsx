@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Rocket, Sparkles } from 'lucide-react';
@@ -8,6 +9,19 @@ import ThemeToggle from '@/components/ThemeToggle';
 const Landing = () => {
   const navigate = useNavigate();
   const classes = [1, 2, 3];
+
+
+
+  const handleStartAdventure = () => {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    
+    if (token && user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
@@ -52,7 +66,7 @@ const Landing = () => {
         <div className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <Button
             size="lg"
-            onClick={() => navigate('/dashboard')}
+            onClick={handleStartAdventure}
             className="gradient-button text-white text-xl px-12 py-8 rounded-3xl pulse-glow hover:scale-110 transition-transform duration-300 shadow-xl"
           >
             <Rocket className="w-6 h-6 mr-2" />

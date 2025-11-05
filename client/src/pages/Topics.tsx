@@ -3,11 +3,12 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { topics } from '@/data/mockData';
+import { getChaptersForClass } from '@/data/quizData';
 import { useStudent } from '@/contexts/StudentContext';
-import { ArrowLeft, Star, Lock, CheckCircle, Circle } from 'lucide-react';
+import { ArrowLeft, Star, Lock, CheckCircle, Circle, BookOpen } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Mascot from '@/components/Mascot';
+import Navbar from '@/components/Navbar';
 import Breadcrumb from '@/components/Breadcrumb';
 import { useState } from 'react';
 
@@ -17,11 +18,13 @@ const Topics = () => {
   const { student } = useStudent();
   const [viewMode, setViewMode] = useState<'path' | 'grid'>('path');
   
-  const subjectTopics = topics[subject as keyof typeof topics] || [];
+  // Get chapters based on student's class and subject
+  const subjectKey = subject === 'math' ? 'math' : 'science';
+  const chapters = getChaptersForClass(student.class, subjectKey);
   const subjectName = subject === 'math' ? 'Math Island' : 'Science Island';
 
-  const getTopicCompletion = (topicId: string) => {
-    return student.completedTopics.includes(topicId) ? 3 : 0;
+  const getChapterCompletion = (chapterId: string) => {
+    return student.completedTopics.includes(chapterId) ? 3 : 0;
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -42,13 +45,15 @@ const Topics = () => {
     }
   };
 
-  const completedCount = subjectTopics.filter(t => student.completedTopics.includes(t.id)).length;
-  const totalCount = subjectTopics.length;
-  const progressPercentage = (completedCount / totalCount) * 100;
+  const completedCount = chapters.filter(ch => student.completedTopics.includes(ch.id)).length;
+  const totalCount = chapters.length;
+  const progressPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
-    <div className="min-h-screen p-6 md:p-12">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen relative">
+      <Navbar />
+      <div className="pt-20 sm:pt-24 pb-20 md:pb-6 px-4 sm:px-6 md:px-12">
+        <div className="max-w-6xl mx-auto space-y-8">
         <Breadcrumb items={[
           { label: 'Dashboard', path: '/dashboard' },
           { label: subjectName, path: '' }
@@ -120,20 +125,20 @@ const Topics = () => {
           <div className="relative">
             {/* Learning Path Container */}
             <div className="space-y-8">
-              {subjectTopics.map((topic, index) => {
-                const completionStars = getTopicCompletion(topic.id);
+              {chapters.map((chapter, index) => {
+                const completionStars = getChapterCompletion(chapter.id);
                 const isCompleted = completionStars > 0;
-                const isLocked = topic.locked;
+                const isLocked = false; // For now, all chapters unlocked
                 const isNext = !isCompleted && !isLocked;
                 
                 return (
-                  <div key={topic.id} className="relative">
+                  <div key={chapter.id} className="relative">
                     {/* Connection Line */}
-                    {index < subjectTopics.length - 1 && (
+                    {index < chapters.length - 1 && (
                       <div className="absolute left-1/2 top-full w-1 h-8 -translate-x-1/2 bg-gradient-to-b from-primary/50 to-transparent" />
                     )}
                     
-                    {/* Topic Card */}
+                    {/* Chapter Card */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -151,7 +156,7 @@ const Topics = () => {
                             ? 'bg-gradient-to-r from-primary/10 to-accent/10 border-primary/30 glow-on-hover'
                             : 'border-muted'
                         }`}
-                        onClick={() => !isLocked && navigate(`/quiz/${topic.id}`)}
+                        onClick={() => !isLocked && navigate(`/chapter/${chapter.id}`)}
                       >
                         <div className="flex items-center gap-6">
                           {/* Status Icon */}
@@ -166,22 +171,22 @@ const Topics = () => {
                               </div>
                             ) : (
                               <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
-                                <Circle className="w-10 h-10 text-primary" />
+                                <BookOpen className="w-10 h-10 text-primary" />
                               </div>
                             )}
                           </div>
 
-                          {/* Topic Icon */}
-                          <div className="text-6xl">{topic.icon}</div>
+                          {/* Chapter Icon */}
+                          <div className="text-6xl">{chapter.icon}</div>
 
-                          {/* Topic Info */}
+                          {/* Chapter Info */}
                           <div className="flex-1 space-y-2">
                             <div className="flex items-center gap-3 flex-wrap">
                               <h3 className="text-2xl font-bold text-foreground">
-                                {topic.name}
+                                {chapter.name}
                               </h3>
-                              <Badge className={getDifficultyColor(topic.difficulty || 'easy')}>
-                                {getDifficultyLabel(topic.difficulty || 'easy')}
+                              <Badge className={getDifficultyColor(chapter.difficulty || 'easy')}>
+                                {getDifficultyLabel(chapter.difficulty || 'easy')}
                               </Badge>
                               {isNext && (
                                 <Badge className="bg-blue-500 animate-pulse">
@@ -191,7 +196,12 @@ const Topics = () => {
                             </div>
                             
                             <p className="text-muted-foreground">
-                              {topic.description}
+                              {chapter.description}
+                            </p>
+                            
+                            <p className="text-sm text-primary/70 flex items-center gap-2">
+                              <BookOpen className="w-4 h-4" />
+                              5 Quiz Sets • 25 Questions
                             </p>
 
                             {/* Completion Stars */}
@@ -216,7 +226,7 @@ const Topics = () => {
                             {isLocked && (
                               <p className="text-sm text-muted-foreground flex items-center gap-2">
                                 <Lock className="w-4 h-4" />
-                                Complete previous topics to unlock
+                                Complete previous chapters to unlock
                               </p>
                             )}
                           </div>
@@ -246,25 +256,25 @@ const Topics = () => {
         {/* Grid View (Original) */}
         {viewMode === 'grid' && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {subjectTopics.map((topic, index) => {
-              const completionStars = getTopicCompletion(topic.id);
-              const isLocked = topic.locked;
+            {chapters.map((chapter, index) => {
+              const completionStars = getChapterCompletion(chapter.id);
+              const isLocked = false; // All chapters unlocked for now
               
               return (
                 <Card
-                  key={topic.id}
+                  key={chapter.id}
                   className={`p-8 transition-all duration-300 ${
                     isLocked 
                       ? 'opacity-50 cursor-not-allowed' 
                       : 'cursor-pointer hover:scale-105 hover:shadow-2xl'
                   } gradient-card border-2 border-white/50 animate-fade-in`}
                   style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => !isLocked && navigate(`/quiz/${topic.id}`)}
+                  onClick={() => !isLocked && navigate(`/chapter/${chapter.id}`)}
                 >
                   <div className="space-y-4">
                     {/* Icon & Lock */}
                     <div className="relative">
-                      <div className="text-6xl text-center">{topic.icon}</div>
+                      <div className="text-6xl text-center">{chapter.icon}</div>
                       {isLocked && (
                         <div className="absolute top-0 right-0">
                           <Lock className="w-8 h-8 text-foreground/50" />
@@ -272,17 +282,22 @@ const Topics = () => {
                       )}
                     </div>
 
-                    {/* Topic Name */}
+                    {/* Chapter Name */}
                     <h3 className="text-2xl font-bold text-center text-foreground">
-                      {topic.name}
+                      {chapter.name}
                     </h3>
 
                     {/* Difficulty Badge */}
                     <div className="flex justify-center">
-                      <Badge className={getDifficultyColor(topic.difficulty || 'easy')}>
-                        {getDifficultyLabel(topic.difficulty || 'easy')}
+                      <Badge className={getDifficultyColor(chapter.difficulty || 'easy')}>
+                        {getDifficultyLabel(chapter.difficulty || 'easy')}
                       </Badge>
                     </div>
+                    
+                    {/* Quiz Info */}
+                    <p className="text-sm text-center text-muted-foreground">
+                      5 Quiz Sets • 25 Questions
+                    </p>
 
                     {/* Completion Stars */}
                     <div className="flex justify-center gap-2">
@@ -314,6 +329,7 @@ const Topics = () => {
         )}
 
         <Mascot mood="idle" />
+        </div>
       </div>
     </div>
   );

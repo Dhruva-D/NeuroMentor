@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { quizData } from '@/data/mockData';
+import { getQuizSet } from '@/data/quizData';
 import { useStudent } from '@/contexts/StudentContext';
 import { Timer, Trophy } from 'lucide-react';
 import Mascot from '@/components/Mascot';
@@ -11,11 +11,13 @@ import Breadcrumb from '@/components/Breadcrumb';
 import { Progress } from '@/components/ui/progress';
 
 const Quiz = () => {
-  const { topicId } = useParams<{ topicId: string }>();
+  const { chapterId, quizSetId } = useParams<{ chapterId: string; quizSetId: string }>();
   const navigate = useNavigate();
-  const { completeTopicHandler, addStars } = useStudent();
+  const { student, completeTopicHandler, addStars } = useStudent();
   
-  const questions = quizData[topicId || 'counting'] || quizData.counting;
+  const quizSet = getQuizSet(chapterId || '', quizSetId || '', student.class);
+  const questions = quizSet?.questions || [];
+  
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -73,8 +75,8 @@ const Quiz = () => {
       setShowResult(true);
       setMascotMood('celebrating');
       setShowConfetti(true);
-      if (topicId) {
-        completeTopicHandler(topicId);
+      if (chapterId) {
+        completeTopicHandler(chapterId);
       }
     }
   };
@@ -111,10 +113,18 @@ const Quiz = () => {
     );
   }
 
-  const question = questions[currentQuestion];
+  if (!quizSet || questions.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-2xl">Quiz not found!</p>
+      </div>
+    );
+  }
 
-  const subjectName = topicId?.includes('count') || topicId?.includes('add') || topicId?.includes('sub') || topicId?.includes('shape') ? 'Math Island' : 'Science Island';
-  const topicName = topicId?.charAt(0).toUpperCase() + topicId?.slice(1);
+  const question = questions[currentQuestion];
+  const subject = chapterId?.includes('math') ? 'math' : 'science';
+  const subjectName = subject === 'math' ? 'Math Island' : 'Science Island';
+  const quizName = quizSet.name;
 
   return (
     <div className="min-h-screen p-4 md:p-6 bg-gradient-to-br from-[#C8E4F9] to-[#E0F2FF]">
@@ -122,8 +132,8 @@ const Quiz = () => {
       <div className="max-w-4xl mx-auto space-y-6">
         <Breadcrumb items={[
           { label: 'Dashboard', path: '/dashboard' },
-          { label: subjectName, path: `/topics/${topicId?.includes('count') || topicId?.includes('add') ? 'math' : 'science'}` },
-          { label: topicName || 'Quiz', path: '' }
+          { label: subjectName, path: `/topics/${subject}` },
+          { label: quizName, path: '' }
         ]} />
 
         {/* Header with Back Button and Star Progress */}
@@ -148,7 +158,7 @@ const Quiz = () => {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-800">
-              {topicName?.replace(/([A-Z])/g, ' $1').trim() || 'Math - Counting'}
+              {quizName}
             </h1>
             <span className="text-lg font-semibold text-[#5B9FD8]">
               Question {currentQuestion + 1}/{questions.length}

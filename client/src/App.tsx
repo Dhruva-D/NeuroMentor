@@ -9,16 +9,19 @@ import { AnimatePresence } from "framer-motion";
 import { useState, useEffect, lazy, Suspense } from "react";
 import SplashScreen from "./components/SplashScreen";
 import PageTransition from "./components/PageTransition";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { DashboardSkeleton, TopicsSkeleton, QuizSkeleton, RewardsSkeleton, SettingsSkeleton } from "./components/SkeletonLoaders";
 
 // Lazy load pages for code splitting
 const Landing = lazy(() => import("./pages/Landing"));
+const Login = lazy(() => import("./pages/Login"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Topics = lazy(() => import("./pages/Topics"));
+const ChapterQuizzes = lazy(() => import("./pages/ChapterQuizzes"));
 const Quiz = lazy(() => import("./pages/Quiz"));
 const Rewards = lazy(() => import("./pages/Rewards"));
 const SessionComplete = lazy(() => import("./pages/SessionComplete"));
-const Settings = lazy(() => import("./pages/Settings"));
+const Profile = lazy(() => import("./pages/Profile"));
 const TeacherDashboard = lazy(() => import("./pages/TeacherDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -35,34 +38,65 @@ const AnimatedRoutes = () => {
             <PageTransition><Landing /></PageTransition>
           </Suspense>
         } />
+        <Route path="/login" element={
+          <Suspense fallback={<DashboardSkeleton />}>
+            <PageTransition><Login /></PageTransition>
+          </Suspense>
+        } />
         <Route path="/dashboard" element={
           <Suspense fallback={<DashboardSkeleton />}>
-            <PageTransition><Dashboard /></PageTransition>
+            <ProtectedRoute>
+              <PageTransition><Dashboard /></PageTransition>
+            </ProtectedRoute>
           </Suspense>
         } />
         <Route path="/topics/:subject" element={
           <Suspense fallback={<TopicsSkeleton />}>
-            <PageTransition><Topics /></PageTransition>
+            <ProtectedRoute>
+              <PageTransition><Topics /></PageTransition>
+            </ProtectedRoute>
           </Suspense>
         } />
-        <Route path="/quiz/:topicId" element={
+        <Route path="/chapter/:chapterId" element={
           <Suspense fallback={<QuizSkeleton />}>
-            <PageTransition><Quiz /></PageTransition>
+            <ProtectedRoute>
+              <PageTransition><ChapterQuizzes /></PageTransition>
+            </ProtectedRoute>
+          </Suspense>
+        } />
+        <Route path="/quiz/:chapterId/:quizSetId" element={
+          <Suspense fallback={<QuizSkeleton />}>
+            <ProtectedRoute>
+              <PageTransition><Quiz /></PageTransition>
+            </ProtectedRoute>
           </Suspense>
         } />
         <Route path="/rewards" element={
           <Suspense fallback={<RewardsSkeleton />}>
-            <PageTransition><Rewards /></PageTransition>
+            <ProtectedRoute>
+              <PageTransition><Rewards /></PageTransition>
+            </ProtectedRoute>
           </Suspense>
         } />
         <Route path="/session-complete" element={
           <Suspense fallback={<DashboardSkeleton />}>
-            <PageTransition><SessionComplete /></PageTransition>
+            <ProtectedRoute>
+              <PageTransition><SessionComplete /></PageTransition>
+            </ProtectedRoute>
+          </Suspense>
+        } />
+        <Route path="/profile" element={
+          <Suspense fallback={<SettingsSkeleton />}>
+            <ProtectedRoute>
+              <PageTransition><Profile /></PageTransition>
+            </ProtectedRoute>
           </Suspense>
         } />
         <Route path="/settings" element={
           <Suspense fallback={<SettingsSkeleton />}>
-            <PageTransition><Settings /></PageTransition>
+            <ProtectedRoute>
+              <PageTransition><Profile /></PageTransition>
+            </ProtectedRoute>
           </Suspense>
         } />
         <Route path="/teacher-dashboard" element={

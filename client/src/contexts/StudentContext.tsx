@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface StudentProgress {
   name: string;
   class: number;
+  email: string;
   completedTopics: string[];
   stars: number;
   badges: string[];
@@ -15,18 +16,51 @@ interface StudentContextType {
   completeTopicHandler: (topic: string) => void;
   addStars: (count: number) => void;
   addBadge: (badge: string) => void;
+  isLoading: boolean;
+  refreshUserData: () => void;
 }
 
 const StudentContext = createContext<StudentContextType | undefined>(undefined);
 
 export const StudentProvider = ({ children }: { children: ReactNode }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [student, setStudent] = useState<StudentProgress>({
-    name: 'Alex',
-    class: 2,
-    completedTopics: ['counting', 'plants'],
-    stars: 50,
-    badges: ['number-ninja', 'plant-expert'],
+    name: 'Guest',
+    class: 1,
+    email: '',
+    completedTopics: [],
+    stars: 0,
+    badges: [],
   });
+
+  useEffect(() => {
+    // Load user data from localStorage
+    loadUserData();
+  }, []);
+
+  const loadUserData = () => {
+    const userStr = localStorage.getItem('user');
+    console.log('Loading user data from localStorage:', userStr);
+    if (userStr) {
+      try {
+        const userData = JSON.parse(userStr);
+        console.log('Parsed user data:', userData);
+        setStudent(prev => ({
+          ...prev,
+          name: userData.name || 'Guest',
+          class: parseInt(userData.class_name) || 1,
+          email: userData.email || '',
+        }));
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    }
+    setIsLoading(false);
+  };
+
+  const refreshUserData = () => {
+    loadUserData();
+  };
 
   const updateProgress = (updates: Partial<StudentProgress>) => {
     setStudent(prev => ({ ...prev, ...updates }));
@@ -51,7 +85,7 @@ export const StudentProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <StudentContext.Provider value={{ student, updateProgress, completeTopicHandler, addStars, addBadge }}>
+    <StudentContext.Provider value={{ student, updateProgress, completeTopicHandler, addStars, addBadge, isLoading, refreshUserData }}>
       {children}
     </StudentContext.Provider>
   );
