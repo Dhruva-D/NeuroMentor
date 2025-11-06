@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 interface StudentProgress {
+  id?: number;
   name: string;
   class: number;
   email: string;
@@ -47,6 +48,7 @@ export const StudentProvider = ({ children }: { children: ReactNode }) => {
         console.log('Parsed user data:', userData);
         setStudent(prev => ({
           ...prev,
+          id: userData.id || userData._id || Math.floor(Math.random() * 10000), // Fallback to random ID
           name: userData.name || 'Guest',
           class: parseInt(userData.class_name) || 1,
           email: userData.email || '',
